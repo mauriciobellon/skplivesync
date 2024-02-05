@@ -4,6 +4,8 @@ import json
 import shutil
 import pathlib
 import hashlib
+import zipfile
+import io
 from math import atan, pi, tan
 import bpy.utils.previews
 from mathutils import Vector
@@ -20,7 +22,7 @@ bl_info = {
     "version" : (1, 0, 0),
     "location" : "",
     "waring" : "",
-    "doc_url": "www.github.com/mauriciobellon/sketchup_live_sync",
+    "doc_url": "www.github.com/mauriciobellon/skplivesync",
     "tracker_url": "", 
     "category" : "3D View" 
 }
@@ -124,6 +126,7 @@ class SNA_OT_Stop_Syncing(bpy.types.Operator):
     def invoke(self, context, event):
         return self.execute(context)
 
+
 class SNA_OT_Update_Plugin(bpy.types.Operator):
     bl_idname = "sna.update_plugin"
     bl_label = "Update Plugin"
@@ -135,27 +138,32 @@ class SNA_OT_Update_Plugin(bpy.types.Operator):
         return not False
         
     def execute(self, context):
-        if bpy.app.timers.is_registered(Timer):
-            print('Stoping Sync')
-            bpy.app.timers.unregister(Timer)          
-            ui['sna_status'] = "stopped"
-         
-        print('Updating Plugin')
         plugin_name = 'sketchup_live'
-        addon_dir = os.path.join('C:\\Users\\mauricio\\OneDrive\\Code\\skplivesync\\sketchup_live')
-        addons_dir = os.path.join(bpy.utils.user_resource('SCRIPTS'), 'addons')
+        github_url = "https://github.com/mauriciobellon/skplivesync/archive/refs/heads/main.zip"
+        print('Updating Plugin from GitHub')
+        try:
+            r = requests.get(github_url)
+            z = zipfile.ZipFile(io.BytesIO(r.content))
+            z.extractall(path=bpy.utils.user_resource('SCRIPTS', 'addons'))
+        except Exception as e:
+            self.report({'ERROR'}, f"Failed to download or extract plugin: {e}")
+            return {"CANCELLED"}
+        addon_dir = os.path.join(bpy.utils.user_resource('SCRIPTS', 'addons'), 'skplivesync-main', plugin_name)
+        addons_dir = os.path.join(bpy.utils.user_resource('SCRIPTS'), 'addons', plugin_name)
+        if os.path.exists(addons_dir):
+            shutil.rmtree(addons_dir)
+        shutil.move(addon_dir, addons_dir)
         bpy.ops.preferences.addon_refresh()
         if plugin_name in bpy.context.preferences.addons:
-            bpy.ops.preferences.addon_remove(module=plugin_name) 
-            shutil.copytree(addon_dir,  os.path.join(addons_dir, plugin_name))
-            bpy.ops.preferences.addon_enable(module=plugin_name)
-        print('Done Updating Plugin')
+            bpy.ops.preferences.addon_remove(module=plugin_name)
+        bpy.ops.preferences.addon_enable(module=plugin_name)
         bpy.ops.preferences.addon_refresh()
-            
+        print('Done Updating Plugin')
         return {"FINISHED"}
     
     def invoke(self, context, event):
         return self.execute(context)
+
     
     
 
