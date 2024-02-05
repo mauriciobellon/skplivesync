@@ -161,7 +161,7 @@ class SNA_OT_Update_Plugin(bpy.types.Operator):
             self.report({'ERROR'}, f"Failed to download or extract plugin: {e}")
             return {"CANCELLED"}
 
-        addon_extracted_path = os.path.join(temp_extract_path, 'skplivesync-main', plugin_name)
+        addon_extracted_path = os.path.join(temp_extract_path, 'skplivesync-main')
         final_addon_path = os.path.join(addons_path, plugin_name)
 
         # Mover o diretório extraído para o local correto e limpar diretório temporário
