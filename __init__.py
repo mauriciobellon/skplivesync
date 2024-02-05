@@ -167,7 +167,7 @@ class SNA_OT_Update_Plugin(bpy.types.Operator):
         # Mover o diretório extraído para o local correto e limpar diretório temporário
         if os.path.exists(final_addon_path):
             shutil.rmtree(final_addon_path)
-        shutil.move(addon_extracted_path, addons_path)
+        shutil.move(addon_extracted_path, final_addon_path)
         shutil.rmtree(temp_extract_path)  # Limpa o diretório temporário
 
         # Atualizar e habilitar o plugin
