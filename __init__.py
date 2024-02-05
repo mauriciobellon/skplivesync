@@ -2,6 +2,7 @@ import os
 import bpy
 import json
 import shutil
+import requests
 import pathlib
 import hashlib
 import zipfile
@@ -139,7 +140,7 @@ class SNA_OT_Update_Plugin(bpy.types.Operator):
         
     def execute(self, context):
         plugin_name = 'sketchup_live'
-        github_url = "https://github.com/mauriciobellon/skplivesync/archive/refs/heads/main.zip"
+        github_url = "https://codeload.github.com/mauriciobellon/skplivesync/zip/refs/heads/master"
         print('Updating Plugin from GitHub')
         try:
             r = requests.get(github_url)
