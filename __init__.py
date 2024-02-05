@@ -143,7 +143,7 @@ class SNA_OT_Update_Plugin(bpy.types.Operator):
         return not False
         
     def execute(self, context):
-        plugin_name = 'sketchup_live'
+        plugin_name = 'skplivesync'
         github_url = "https://codeload.github.com/mauriciobellon/skplivesync/zip/refs/heads/master"
 
         # Informar o início do processo de atualização
