@@ -1,3 +1,1 @@
-
-
-
+# Sketchup Live Sync with Blender
