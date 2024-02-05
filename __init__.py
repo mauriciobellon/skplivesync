@@ -128,6 +128,10 @@ class SNA_OT_Stop_Syncing(bpy.types.Operator):
         return self.execute(context)
 
 
+
+
+
+
 class SNA_OT_Update_Plugin(bpy.types.Operator):
     bl_idname = "sna.update_plugin"
     bl_label = "Update Plugin"
@@ -141,29 +145,46 @@ class SNA_OT_Update_Plugin(bpy.types.Operator):
     def execute(self, context):
         plugin_name = 'sketchup_live'
         github_url = "https://codeload.github.com/mauriciobellon/skplivesync/zip/refs/heads/master"
+
+        # Informar o início do processo de atualização
         print('Updating Plugin from GitHub')
+
+        # Download do arquivo zip do plugin do GitHub
         try:
             r = requests.get(github_url)
             z = zipfile.ZipFile(io.BytesIO(r.content))
-            z.extractall(path=bpy.utils.user_resource('SCRIPTS', 'addons'))
+            scripts_path = bpy.utils.user_resource('SCRIPTS')
+            addons_path = os.path.join(scripts_path, 'addons')
+            temp_extract_path = os.path.join(addons_path, 'temp_skplivesync')
+            z.extractall(path=temp_extract_path)
         except Exception as e:
             self.report({'ERROR'}, f"Failed to download or extract plugin: {e}")
             return {"CANCELLED"}
-        addon_dir = os.path.join(bpy.utils.user_resource('SCRIPTS', 'addons'), 'skplivesync-main', plugin_name)
-        addons_dir = os.path.join(bpy.utils.user_resource('SCRIPTS'), 'addons', plugin_name)
-        if os.path.exists(addons_dir):
-            shutil.rmtree(addons_dir)
-        shutil.move(addon_dir, addons_dir)
+
+        addon_extracted_path = os.path.join(temp_extract_path, 'skplivesync-main', plugin_name)
+        final_addon_path = os.path.join(addons_path, plugin_name)
+
+        # Mover o diretório extraído para o local correto e limpar diretório temporário
+        if os.path.exists(final_addon_path):
+            shutil.rmtree(final_addon_path)
+        shutil.move(addon_extracted_path, addons_path)
+        shutil.rmtree(temp_extract_path)  # Limpa o diretório temporário
+
+        # Atualizar e habilitar o plugin
         bpy.ops.preferences.addon_refresh()
         if plugin_name in bpy.context.preferences.addons:
             bpy.ops.preferences.addon_remove(module=plugin_name)
         bpy.ops.preferences.addon_enable(module=plugin_name)
         bpy.ops.preferences.addon_refresh()
+
         print('Done Updating Plugin')
         return {"FINISHED"}
     
     def invoke(self, context, event):
         return self.execute(context)
+
+
+
 
     
     
